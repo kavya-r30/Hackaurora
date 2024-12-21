@@ -1,17 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mic, MicOff, ArrowRight, DollarSign, PieChart, Clock } from 'lucide-react';
 
 const FinancialVoiceLanding = () => {
   const [isListening, setIsListening] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [voiceCommand, setVoiceCommand] = useState(''); // Holds voice input
+  const [responseMessage, setResponseMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [serverStatus, setServerStatus] = useState('checking');
 
-  const toggleListening = () => {
-    setIsListening(!isListening);
-    if (!isListening) {
-      startListening();
-    } else {
-      stopListening();
+  useEffect(() => {
+    checkServerStatus();
+  }, []);
+
+  const checkServerStatus = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/test');
+      const data = await response.json();
+      setServerStatus(data.status ? 'running' : 'error');
+    } catch (err) {
+      setServerStatus('error');
+      console.error("Server check failed:", err);
+    }
+  };
+
+  const toggleListening = async () => {
+    if (serverStatus !== 'running') {
+      setError('Server is not running. Please start the Flask server.');
+      return;
+    }
+
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    setIsListening(true);
+    setIsProcessing(true);
+    setError('');
+
+    try {
+      console.log("Starting speech recognition...");
+      const response = await fetch("http://127.0.0.1:5000/process-query", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: "user_1",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Processed data:", data);
+
+      if (data.error) {
+        setError(data.error);
+      } else if (data.response) {
+        setResponseMessage(data.response);
+        const speech = new SpeechSynthesisUtterance(data.response);
+        window.speechSynthesis.speak(speech);
+      }
+    } catch (err) {
+      console.error("Error details:", err);
+      setError(`Connection error: ${err.message}`);
+    } finally {
+      setIsListening(false);
+      setIsProcessing(false);
     }
   };
 
@@ -19,99 +78,98 @@ const FinancialVoiceLanding = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const startListening = () => {
-    // This is where you'd integrate a speech recognition API, like Web Speech API or react-speech-recognition
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.onresult = (event) => {
-      const command = event.results[0][0].transcript;
-      setVoiceCommand(command);
-      sendToServer(command);
+  // Clean up speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
     };
-    recognition.start();
-  };
-
-  const stopListening = () => {
-    // Handle stopping the listening process here
-  };
-
-  const sendToServer = async (command) => {
-    try {
-      const response = await fetch('http://localhost:5000/process-voice', { // Replace with actual endpoint
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ command }), // Sending voice command to the server
-      });
-      const data = await response.json();
-      console.log(data);
-      // Handle server response
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-      {/* Hero Section */}
-      <header className="w-full">
-        <nav className="bg-white shadow-md w-full py-2.5">
-          <div className="container mx-auto px-4 flex justify-between items-center">
-            <div className="text-2xl font-bold text-blue-600">FinanceVoice</div>
-            {/* Navbar Links */}
-            <div className="hidden md:flex space-x-6">
-              <button className="text-slate-600 hover:text-blue-600">Features</button>
-              <button className="text-slate-600 hover:text-blue-600">Pricing</button>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700">
-                Get Started
-              </button>
-            </div>
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <button onClick={toggleMenu} className="text-slate-600 hover:text-blue-600">
-                Menu
-              </button>
-            </div>
-          </div>
-          {/* Mobile Menu Dropdown */}
-          {isMenuOpen && (
-            <div className="md:hidden bg-white shadow-md w-full absolute top-14 left-0 py-4 px-4">
-              <button className="block text-slate-600 hover:text-blue-600 w-full text-center py-2">Features</button>
-              <button className="block text-slate-600 hover:text-blue-600 w-full text-center py-2">Pricing</button>
-              <button className="block bg-blue-600 text-white w-full text-center py-2 rounded-full hover:bg-blue-700">
-                Get Started
-              </button>
-            </div>
-          )}
-        </nav>
-
-        <div className="pt-24 flex flex-col items-center text-center">
-          <h1 className="text-5xl font-bold text-slate-800 mb-6">
-            Your Financial Assistant,<br />Just a Voice Command Away
-          </h1>
-          <p className="text-xl text-slate-600 mb-12 max-w-2xl">
-            Manage your finances, check balances, and make transactions using natural voice commands. 
-            Powered by advanced AI to understand your financial needs.
+      {/* Server Status Alert */}
+      {serverStatus === 'error' && (
+        <div className="fixed top-0 w-full bg-red-100 border-b border-red-200 px-4 py-3 text-red-700 z-50">
+          <p className="text-center">
+            Server is not running. Please start the Flask server and refresh the page.
           </p>
+        </div>
+      )}
 
-          {/* Voice Input Demo */}
-          <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-2xl mb-12">
-            <div className="flex flex-col items-center space-y-6">
-              <button 
-                onClick={toggleListening}
-                className={`p-6 rounded-full transition-all duration-300 ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
-              >
-                {isListening ? <Mic size={48} /> : <MicOff size={48} />}
-              </button>
-              <p className="text-slate-600">
-                {isListening ? "Listening... Try saying 'What's my account balance?'" : "Tap the microphone to start"}
-              </p>
-              <p className="text-slate-600 mt-4">{voiceCommand && `You said: ${voiceCommand}`}</p>
-            </div>
+      {/* Navbar */}
+      <nav className="bg-white shadow-md w-full py-2.5 fixed top-0 z-40">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <div className="text-2xl font-bold text-blue-600">FinanceVoice</div>
+          <div className="hidden md:flex space-x-6">
+            <button className="text-slate-600 hover:text-blue-600">Features</button>
+            <button className="text-slate-600 hover:text-blue-600">Pricing</button>
+            <button className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700">
+              Get Started
+            </button>
+          </div>
+          <div className="md:hidden">
+            <button onClick={toggleMenu} className="text-slate-600 hover:text-blue-600">
+              Menu
+            </button>
           </div>
         </div>
-      </header>
+        
+        {isMenuOpen && (
+          <div className="md:hidden bg-white shadow-md w-full absolute top-14 left-0 py-4 px-4">
+            <button className="block text-slate-600 hover:text-blue-600 w-full text-center py-2">Features</button>
+            <button className="block text-slate-600 hover:text-blue-600 w-full text-center py-2">Pricing</button>
+            <button className="block bg-blue-600 text-white w-full text-center py-2 rounded-full hover:bg-blue-700">
+              Get Started
+            </button>
+          </div>
+        )}
+      </nav>
+
+      {/* Hero Section */}
+      <div className="pt-24 flex flex-col items-center text-center">
+        <h1 className="text-5xl font-bold text-slate-800 mb-6">
+          Your Financial Assistant,<br />Just a Voice Command Away
+        </h1>
+        <p className="text-xl text-slate-600 mb-12 max-w-2xl">
+          Manage your finances, check balances, and make transactions using natural voice commands. 
+          Powered by Google's Gemini AI to understand your financial needs.
+        </p>
+
+        {/* Voice Input Demo */}
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-2xl mb-12">
+          <div className="flex flex-col items-center space-y-6">
+            <button 
+              onClick={toggleListening}
+              disabled={isProcessing}
+              className={`p-6 rounded-full transition-all duration-300 ${
+                isListening ? 'bg-red-100 text-red-600 animate-pulse' : 
+                isProcessing ? 'bg-gray-100 text-gray-400' :
+                'bg-blue-100 text-blue-600 hover:bg-blue-200'
+              }`}
+            >
+              {isListening ? <Mic size={48} /> : <MicOff size={48} />}
+            </button>
+
+            <p className="text-slate-600">
+              {isProcessing ? "Processing..." : 
+               isListening ? "Listening... Try asking about your finances" : 
+               "Tap the microphone to start"}
+            </p>
+
+            {error && (
+              <div className="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
+
+            {responseMessage && (
+              <div className="w-full bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+                {responseMessage}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Features Section */}
       <section className="bg-white py-20">
@@ -119,11 +177,12 @@ const FinancialVoiceLanding = () => {
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
             Why Choose FinanceVoice?
           </h2>
+          
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard 
               icon={<DollarSign size={32} />}
-              title="Easy Transactions"
-              description="Make payments and transfers with simple voice commands. No more typing or clicking through menus."
+              title="AI-Powered Advice"
+              description="Get personalized financial advice powered by Google's Gemini AI technology."
             />
             <FeatureCard 
               icon={<PieChart size={32} />}

@@ -1,0 +1,128 @@
+{
+    "users": [
+        {
+            "user_id": "user_1",
+            "Name": "John Doe",
+            "financial_data": {
+                "income": {
+                    "salary": 5000,
+                    "freelance": 1200,
+                    "other": 300
+                },
+                "expenses": {
+                    "rent": 1200,
+                    "utilities": 300,
+                    "groceries": 500,
+                    "entertainment": 200,
+                    "transportation": 150,
+                    "other": 100
+                },
+                "savings": {
+                    "emergency_fund": 10000,
+                    "retirement_fund": 25000,
+                    "other": 5000
+                },
+                "investments": {
+                    "stocks": 15000,
+                    "bonds": 8000,
+                    "real_estate": 50000,
+                    "mutual_funds": 12000,
+                    "cryptocurrency": 3000
+                },
+                "transactions": [
+                    {
+                        "date": "2024-12-20",
+                        "description": "Grocery shopping",
+                        "amount": 100,
+                        "type": "expense"
+                    },
+                    {
+                        "date": "2024-12-19",
+                        "description": "Salary credited",
+                        "amount": 5000,
+                        "type": "income"
+                    },
+                    {
+                        "date": "2024-12-18",
+                        "description": "Electricity bill",
+                        "amount": 150,
+                        "type": "expense"
+                    }
+                ],
+                "loans": {
+                    "home_loan": {
+                        "principal": 200000,
+                        "interest_rate": 3.5,
+                        "monthly_payment": 1200,
+                        "remaining_balance": 180000
+                    },
+                    "car_loan": {
+                        "principal": 25000,
+                        "interest_rate": 5.0,
+                        "monthly_payment": 400,
+                        "remaining_balance": 20000
+                    }
+                }
+            }
+        },
+        {
+            "user_id": "user_2",
+            "Name": "Jane Smith",
+            "financial_data": {
+                "income": {
+                    "salary": 6000,
+                    "rental_income": 2000,
+                    "other": 500
+                },
+                "expenses": {
+                    "mortgage": 1500,
+                    "childcare": 800,
+                    "utilities": 350,
+                    "groceries": 600,
+                    "insurance": 200,
+                    "other": 150
+                },
+                "savings": {
+                    "emergency_fund": 15000,
+                    "education_fund": 10000,
+                    "vacation_fund": 3000
+                },
+                "investments": {
+                    "stocks": 20000,
+                    "bonds": 10000,
+                    "real_estate": 70000,
+                    "mutual_funds": 15000,
+                    "gold": 5000
+                },
+                "transactions": [
+                    {
+                        "date": "2024-12-21",
+                        "description": "Childcare payment",
+                        "amount": 800,
+                        "type": "expense"
+                    },
+                    {
+                        "date": "2024-12-20",
+                        "description": "Rental income",
+                        "amount": 2000,
+                        "type": "income"
+                    },
+                    {
+                        "date": "2024-12-19",
+                        "description": "Insurance premium",
+                        "amount": 200,
+                        "type": "expense"
+                    }
+                ],
+                "loans": {
+                    "student_loan": {
+                        "principal": 40000,
+                        "interest_rate": 4.0,
+                        "monthly_payment": 500,
+                        "remaining_balance": 35000
+                    }
+                }
+            }
+        }
+    ]
+}

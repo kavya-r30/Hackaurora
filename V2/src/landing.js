@@ -3,21 +3,59 @@ import { Mic, MicOff, ArrowRight, DollarSign, PieChart, Clock } from 'lucide-rea
 
 const FinancialVoiceLanding = () => {
   const [isListening, setIsListening] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State to handle mobile menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [voiceCommand, setVoiceCommand] = useState(''); // Holds voice input
 
   const toggleListening = () => {
     setIsListening(!isListening);
+    if (!isListening) {
+      startListening();
+    } else {
+      stopListening();
+    }
   };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const startListening = () => {
+    // This is where you'd integrate a speech recognition API, like Web Speech API or react-speech-recognition
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = 'en-US';
+    recognition.onresult = (event) => {
+      const command = event.results[0][0].transcript;
+      setVoiceCommand(command);
+      sendToServer(command);
+    };
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    // Handle stopping the listening process here
+  };
+
+  const sendToServer = async (command) => {
+    try {
+      const response = await fetch('http://localhost:5000/process-voice', { // Replace with actual endpoint
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ command }), // Sending voice command to the server
+      });
+      const data = await response.json();
+      console.log(data);
+      // Handle server response
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Hero Section */}
       <header className="w-full">
-        {/* Navbar */}
         <nav className="bg-white shadow-md w-full py-2.5">
           <div className="container mx-auto px-4 flex justify-between items-center">
             <div className="text-2xl font-bold text-blue-600">FinanceVoice</div>
@@ -36,7 +74,6 @@ const FinancialVoiceLanding = () => {
               </button>
             </div>
           </div>
-          
           {/* Mobile Menu Dropdown */}
           {isMenuOpen && (
             <div className="md:hidden bg-white shadow-md w-full absolute top-14 left-0 py-4 px-4">
@@ -49,7 +86,7 @@ const FinancialVoiceLanding = () => {
           )}
         </nav>
 
-        <div className="pt-24 flex flex-col items-center text-center"> {/* Added pt-24 to avoid navbar overlap */}
+        <div className="pt-24 flex flex-col items-center text-center">
           <h1 className="text-5xl font-bold text-slate-800 mb-6">
             Your Financial Assistant,<br />Just a Voice Command Away
           </h1>
@@ -70,6 +107,7 @@ const FinancialVoiceLanding = () => {
               <p className="text-slate-600">
                 {isListening ? "Listening... Try saying 'What's my account balance?'" : "Tap the microphone to start"}
               </p>
+              <p className="text-slate-600 mt-4">{voiceCommand && `You said: ${voiceCommand}`}</p>
             </div>
           </div>
         </div>
@@ -81,7 +119,6 @@ const FinancialVoiceLanding = () => {
           <h2 className="text-3xl font-bold text-center text-slate-800 mb-12">
             Why Choose FinanceVoice?
           </h2>
-          
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard 
               icon={<DollarSign size={32} />}

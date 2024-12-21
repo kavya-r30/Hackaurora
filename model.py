@@ -170,13 +170,8 @@ def main():
         json_data = json.load(file)
 
     # uncomment this
-    user_choice = input("Type 'text' to input text or press Enter for speech recognition: ").strip().lower()
-
-    # user_choice = "text"
-    if user_choice == "text":
-        user_input = input("Please type your query: ")
-    else:
-        user_input = recognize_speech()
+    # user_choice = input("Type 'text' to input text or press Enter for speech recognition: ").strip().lower()
+    user_choice = "speech"
 
     user_id = "user_1"  # Placeholder for user identification
     user_data = next((user for user in json_data["users"] if user["user_id"] == user_id), None)

@@ -510,7 +510,6 @@ const LoginForm = () => {
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter user_1 or user_2"
           />
         </div>
 
@@ -524,7 +523,6 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter demo123"
           />
         </div>
 

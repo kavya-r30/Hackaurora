@@ -13,11 +13,14 @@ CORS(app)
 recognizer = sr.Recognizer()
 
 # Gemini API details
-GEMINI_API_KEY = "AIzaSyCjBzhIK77PTLujpC0h3Z9KLKOifCOdx8I"
+GEMINI_API_KEY = ""
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
 def convert_json_to_text(user_data):
     """Convert user data to text format for the Gemini prompt."""
+    if(user_data == None): 
+        return None
+
     name = user_data.get("Name", "Unknown")
 
     income = user_data.get("financial_data", {}).get("income", {})
@@ -96,27 +99,29 @@ def common_financial_prompt(user_query, user_data):
     """Generate the financial advisor prompt with user details."""
     user_details = convert_json_to_text(user_data)
     return f"""
-You are a financial advisor. A user has the following financial question:
-
-User's Details: {user_details}
-
-User's Question: {user_query}
-
-Please provide clear and actionable advice based on the user's query. The topics can include but are not limited to:
-- Budgeting and expense management
-- Loan options (e.g., home, car, personal loans)
-- Investment strategies (e.g., stocks, bonds, retirement savings)
-- Credit card recommendations
-- Savings plans (e.g., emergency fund, retirement savings)
-- Financial goal setting and planning
-
-Your response should be:
-1. **Clear**: Make sure your response is easy to understand.
-2. **Actionable**: Offer concrete steps or advice that the user can follow.
-3. **Relevant**: Tailor the advice to the specific topic mentioned in the query.
-
-Do not assume or add extra information unless the user specifies it in the question. Keep the response focused on answering the specific query and keep it concise within 200 words.
-"""
+    You are a friendly caring financial advisor. A user has the following financial question:
+    
+    User's Details: {user_details}
+    
+    User's Question: {user_query}
+    
+    Please provide clear and actionable advice based on the user's query. The topics can include but are not limited to:
+    - Budgeting and expense management
+    - Loan options (e.g., home, car, personal loans)
+    - Investment strategies (e.g., stocks, bonds, retirement savings)
+    - Credit card recommendations
+    - Savings plans (e.g., emergency fund, retirement savings)
+    - Financial goal setting and planning
+    - Friendly chat
+    
+    Your response should be:
+    1. **Clear**: Make sure your response is easy to understand.
+    2. **Actionable**: Offer concrete steps or advice that the user can follow.
+    3. **Relevant**: Tailor the advice to the specific topic mentioned in the query.
+    
+    Do not assume or add extra information unless the user specifies it in the question. 
+    Keep the response focused on answering the specific query and keep it concise within 50-75 words.
+    """
 
 def query_gemini(input_text, user_data):
     """Call Gemini API with the formatted prompt."""
@@ -646,7 +651,8 @@ def process_query():
         user_id = data.get('user_id')
         user_data = load_user_data(user_id)
         if not user_data:
-            return jsonify({"error": "User data not found", "status": "error"}), 404
+            # return jsonify({"error": "User data not found", "status": "error"}), 404
+            print(f"Please login with your user with ID {user_id} to access your financial data.")
 
         print("Starting speech recognition...")
         
@@ -666,7 +672,7 @@ def process_query():
                 print(f"Gemini response: {gemini_response}")
                 
                 # Speak the response
-                speak_text(gemini_response)
+                # speak_text(gemini_response)
                 
                 return jsonify({
                     "response": gemini_response,
@@ -675,10 +681,13 @@ def process_query():
                 })
                 
             except sr.WaitTimeoutError:
+                print("No speech detected status: error 400")
                 return jsonify({"error": "No speech detected", "status": "error"}), 400
             except sr.UnknownValueError:
+                print("Could not understand audio status: error 400")
                 return jsonify({"error": "Could not understand audio", "status": "error"}), 400
             except sr.RequestError as e:
+                print(f"Speech recognition error: {str(e)}: status: error 500")
                 return jsonify({"error": f"Speech recognition error: {str(e)}", "status": "error"}), 500
                 
     except Exception as e:

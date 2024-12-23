@@ -5,7 +5,7 @@ import pyttsx3
 import speech_recognition as sr
 
 # Set up Gemini API key
-GEMINI_API_KEY = "AIzaSyCjBzhIK77PTLujpC0h3Z9KLKOifCOdx8I"
+GEMINI_API_KEY = ""
 GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
 # Initialize pyttsx3
@@ -64,6 +64,9 @@ def speak_text(text):
 
 # Function: Convert user data to text for Gemini prompt
 def convert_json_to_text(user_data):
+    if(user_data == None): 
+        return None
+
     name = user_data.get("Name", "Unknown")
 
     income = user_data.get("financial_data", {}).get("income", {})
@@ -142,43 +145,45 @@ def convert_json_to_text(user_data):
 def common_financial_prompt(user_query, user_data):
     user_details = convert_json_to_text(user_data)
     return f"""
-You are a financial advisor. A user has the following financial question:
-
-User's Details: {user_details}
-
-User's Question: {user_query}
-
-Please provide clear and actionable advice based on the user's query. The topics can include but are not limited to:
-- Budgeting and expense management
-- Loan options (e.g., home, car, personal loans)
-- Investment strategies (e.g., stocks, bonds, retirement savings)
-- Credit card recommendations
-- Savings plans (e.g., emergency fund, retirement savings)
-- Financial goal setting and planning
-
-Your response should be:
-1. **Clear**: Make sure your response is easy to understand.
-2. **Actionable**: Offer concrete steps or advice that the user can follow.
-3. **Relevant**: Tailor the advice to the specific topic mentioned in the query.
-
-Do not assume or add extra information unless the user specifies it in the question. Keep the response focused on answering the specific query and keep it concise within 200 words.
-"""
+    You are a friendly caring financial advisor. A user has the following financial question:
+    
+    User's Details: {user_details}
+    
+    User's Question: {user_query}
+    
+    Please provide clear and actionable advice based on the user's query. The topics can include but are not limited to:
+    - Budgeting and expense management
+    - Loan options (e.g., home, car, personal loans)
+    - Investment strategies (e.g., stocks, bonds, retirement savings)
+    - Credit card recommendations
+    - Savings plans (e.g., emergency fund, retirement savings)
+    - Financial goal setting and planning
+    - Friendly chat
+    
+    Your response should be:
+    1. **Clear**: Make sure your response is easy to understand.
+    2. **Actionable**: Offer concrete steps or advice that the user can follow.
+    3. **Relevant**: Tailor the advice to the specific topic mentioned in the query.
+    
+    Do not assume or add extra information unless the user specifies it in the question. 
+    Keep the response focused on answering the specific query and keep it concise within 50-75 words.
+    """
 
 # Main function
 def main():
-    with open('data.json', 'r') as file:
+    with open("data.json", 'r') as file:
         json_data = json.load(file)
 
     # uncomment this
     # user_choice = input("Type 'text' to input text or press Enter for speech recognition: ").strip().lower()
-    user_choice = "speech"
+    user_choice = "text"
 
-    user_id = "user_1"  # Placeholder for user identification
+    user_id = "user_11"  # Placeholder for user identification
     user_data = next((user for user in json_data["users"] if user["user_id"] == user_id), None)
 
     if not user_data:
-        print(f"User with ID {user_id} not found.")
-        return
+        print(f"Please login with your user with ID {user_id} to access your financial data.")
+        # return
 
     while True:
         if user_choice == "text":

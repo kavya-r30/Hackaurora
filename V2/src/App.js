@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react'
-import FinancialVoiceLanding from './landing';
+import FinancialVoiceLanding from './components/landing';
 
 function App() {
   return (

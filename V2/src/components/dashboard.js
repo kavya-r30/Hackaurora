@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Wallet, TrendingUp, CreditCard, PieChart as PieChartIcon, Activity, DollarSign } from 'lucide-react';
+import React from 'react';
+import { BarChart, Bar, PieChart, Pie, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Wallet, TrendingUp, CreditCard, PieChart as DollarSign } from 'lucide-react';
 
 export const FinancialDashboard = ({ userData }) => {
-  const [timeRange, setTimeRange] = useState('monthly');
+  // const [timeRange, setTimeRange] = useState('monthly');
 
   // Process income data for pie chart
   const incomeData = Object.entries(userData.financial_data.income).map(([name, value]) => ({
